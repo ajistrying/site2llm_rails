@@ -1,0 +1,477 @@
+<% content_for(:title, "site2llm - llms.txt for AI search") %>
+
+<main class="relative overflow-x-hidden bg-paper text-ink" data-controller="survey">
+  <div class="mx-auto flex max-w-6xl flex-col gap-12 px-6 py-4">
+    <!-- Header -->
+    <header class="reveal flex flex-col gap-6" style="--delay: 0ms">
+      <div class="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.32em] text-muted">
+        <span class="rounded-full bg-white/70 px-3 py-1 shadow-sm">site2llm</span>
+        <span>AI search visibility</span>
+      </div>
+      <h1 class="display text-4xl leading-tight text-ink sm:text-5xl lg:text-6xl">
+        Make AI search read your site correctly.
+      </h1>
+      <p class="text-lg text-muted sm:text-xl">
+        AI already crawls your pages. Without llms.txt it guesses your docs, pricing, and
+        product truth without a clear focus. Answer a few questions, we do the rest of the work for you, providing a clean llms.txt you can publish in minutes.
+      </p>
+      <div class="flex flex-wrap items-center gap-4">
+        <button class="btn primary" type="button" data-action="survey#scrollToSurvey">
+          Generate llms.txt
+        </button>
+        <button
+          class="btn ghost"
+          type="button"
+          title="Use this if you already have a Run ID. It's the code from a previous run that lets you re-download."
+          data-action="survey#openRunIdLookup"
+        >
+          Re-download with Run ID
+        </button>
+        <div class="text-lg text-muted">
+          One-time $<%= @price_usd %>. Pay after generation via Stripe Checkout.
+        </div>
+      </div>
+    </header>
+
+    <!-- Value Props -->
+    <section class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <% [
+        { title: "Fix AI misreads", description: "Give models a trusted map so they stop guessing your pricing, features, and docs." },
+        { title: "Show up in AI search", description: "A clean llms.txt makes your site easier to surface and answer from." },
+        { title: "One-time payment", description: "Generate first, then pay $#{@price_usd} to unlock downloads." }
+      ].each_with_index do |prop, index| %>
+        <div class="reveal card" style="--delay: <%= 120 + index * 120 %>ms">
+          <h3 class="text-lg font-semibold"><%= prop[:title] %></h3>
+          <p class="text-muted"><%= prop[:description] %></p>
+        </div>
+      <% end %>
+    </section>
+
+    <!-- How it works -->
+    <section class="grid gap-8 lg:grid-cols-[0.9fr,1.1fr]">
+      <div class="reveal" style="--delay: 120ms">
+        <p class="eyebrow">How it works</p>
+        <h2 class="display text-3xl">Preview before you pay, publish in minutes.</h2>
+      </div>
+      <div class="grid gap-4">
+        <% [
+          { title: "Tell us what AI should get right", description: "Share your homepage, key pages, and questions so we prioritize the answers." },
+          { title: "We crawl only the pages you pick", description: "Send 3-8 priority URLs plus optional pages as full links or /paths, separated by commas or new lines." },
+          { title: "Preview first, pay once, then publish", description: "Review the preview, unlock the file with one payment, and upload in minutes." }
+        ].each_with_index do |step, index| %>
+          <div class="reveal flex gap-4" style="--delay: <%= 160 + index * 120 %>ms">
+            <div class="step"><%= index + 1 %></div>
+            <div>
+              <h3 class="text-lg font-semibold"><%= step[:title] %></h3>
+              <p class="text-muted"><%= step[:description] %></p>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </section>
+
+    <!-- Survey Section -->
+    <section id="survey" class="grid gap-10 lg:grid-cols-[1fr,1fr]">
+      <div class="reveal card" style="--delay: 140ms">
+        <div class="flex items-center justify-between">
+          <h2 class="display text-3xl">Crucial questions</h2>
+          <span class="pill">3-5 min questionnaire</span>
+        </div>
+        <p class="mt-4 text-muted">We only ask for what a crawler cannot infer.</p>
+
+        <%= form_with url: "#", method: :post, data: { action: "submit->survey#handleGenerate", survey_target: "form" }, class: "mt-6 grid gap-6" do %>
+          <ol class="survey-steps">
+            <!-- Step 1 -->
+            <li class="survey-step active" data-survey-target="step" data-step="1">
+              <button
+                class="step-header"
+                type="button"
+                aria-expanded="true"
+                data-action="survey#goToStep"
+                data-step-index="1"
+              >
+                <span class="step-index">1</span>
+                <span class="step-meta">
+                  <span class="step-title">Project basics</span>
+                  <span class="step-desc">Name, URL, and summary.</span>
+                </span>
+                <span class="step-status pending" data-survey-target="step1Status">In progress</span>
+              </button>
+              <div class="step-panel open" data-survey-target="step1Panel">
+                <label class="field">
+                  <div class="field-label"><span>Project or website name</span></div>
+                  <input
+                    type="text"
+                    name="site_name"
+                    placeholder="Northwind Atlas"
+                    data-survey-target="siteName"
+                    data-action="input->survey#persistSurvey input->survey#checkStepCompletion"
+                  >
+                  <span class="error hidden" data-survey-target="siteNameError"></span>
+                  <span class="hint">Use the official brand or product name.</span>
+                </label>
+                <label class="field">
+                  <div class="field-label"><span>Homepage URL</span></div>
+                  <input
+                    type="url"
+                    name="site_url"
+                    placeholder="https://example.com"
+                    data-survey-target="siteUrl"
+                    data-action="input->survey#persistSurvey input->survey#checkStepCompletion blur->survey#normalizeSiteUrl"
+                  >
+                  <span class="error hidden" data-survey-target="siteUrlError"></span>
+                  <span class="hint">We start crawling here (https:// assumed).</span>
+                </label>
+                <label class="field">
+                  <div class="field-label"><span>One sentence description</span></div>
+                  <textarea
+                    name="summary"
+                    rows="3"
+                    placeholder="Plain language summary of who this helps and what it does."
+                    data-survey-target="summary"
+                    data-action="input->survey#persistSurvey input->survey#checkStepCompletion"
+                  ></textarea>
+                  <span class="error hidden" data-survey-target="summaryError"></span>
+                  <span class="hint">One factual sentence (20+ characters).</span>
+                </label>
+                <div class="step-actions">
+                  <span class="step-note">Step 1 of 3</span>
+                  <button
+                    class="btn ghost"
+                    type="button"
+                    data-action="survey#nextStep"
+                    data-survey-target="step1Next"
+                    disabled
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            </li>
+
+            <!-- Step 2 -->
+            <li class="survey-step" data-survey-target="step" data-step="2">
+              <button
+                class="step-header"
+                type="button"
+                aria-expanded="false"
+                aria-disabled="true"
+                disabled
+                data-action="survey#goToStep"
+                data-step-index="2"
+                data-survey-target="step2Header"
+              >
+                <span class="step-index">2</span>
+                <span class="step-meta">
+                  <span class="step-title">Priority crawl</span>
+                  <span class="step-desc">Pages and questions to rank.</span>
+                </span>
+                <span class="step-status locked" data-survey-target="step2Status">Locked</span>
+              </button>
+              <div class="step-panel" data-survey-target="step2Panel">
+                <label class="field">
+                  <div class="field-label">
+                    <span>Priority pages (3-8 URLs)</span>
+                    <span class="tooltip" data-tip="We crawl these first and keep them at the top.">?</span>
+                  </div>
+                  <textarea
+                    name="priority_pages"
+                    rows="2"
+                    placeholder="https://example.com/pricing, /docs/getting-started"
+                    data-survey-target="priorityPages"
+                    data-action="input->survey#persistSurvey input->survey#checkStepCompletion"
+                  ></textarea>
+                  <span class="error hidden" data-survey-target="priorityPagesError"></span>
+                  <span class="hint">Use commas or new lines.</span>
+                </label>
+                <label class="field">
+                  <div class="field-label">
+                    <span>Optional pages (nice-to-have)</span>
+                    <span class="tooltip" data-tip="Placed under Optional so they can be skipped if context is tight.">?</span>
+                  </div>
+                  <textarea
+                    name="optional_pages"
+                    rows="2"
+                    placeholder="/blog, /case-studies"
+                    data-survey-target="optionalPages"
+                    data-action="input->survey#persistSurvey input->survey#checkStepCompletion"
+                  ></textarea>
+                  <span class="error hidden" data-survey-target="optionalPagesError"></span>
+                  <span class="hint">Nice-to-have context. Leave blank if none.</span>
+                </label>
+                <label class="field">
+                  <div class="field-label">
+                    <span>Main questions people ask about your site</span>
+                    <span class="tooltip" data-tip="Helps us prioritize pages and craft clearer summaries.">?</span>
+                  </div>
+                  <textarea
+                    name="questions"
+                    rows="2"
+                    placeholder="pricing, integrations, setup time"
+                    data-survey-target="questions"
+                    data-action="input->survey#persistSurvey input->survey#checkStepCompletion"
+                  ></textarea>
+                  <span class="error hidden" data-survey-target="questionsError"></span>
+                  <span class="hint">Short phrases are perfect.</span>
+                </label>
+                <div class="step-actions">
+                  <button class="btn ghost" type="button" data-action="survey#prevStep">Back</button>
+                  <span class="step-note">Step 2 of 3</span>
+                  <button
+                    class="btn ghost"
+                    type="button"
+                    data-action="survey#nextStep"
+                    data-survey-target="step2Next"
+                    disabled
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            </li>
+
+            <!-- Step 3 -->
+            <li class="survey-step" data-survey-target="step" data-step="3">
+              <button
+                class="step-header"
+                type="button"
+                aria-expanded="false"
+                aria-disabled="true"
+                disabled
+                data-action="survey#goToStep"
+                data-step-index="3"
+                data-survey-target="step3Header"
+              >
+                <span class="step-index">3</span>
+                <span class="step-meta">
+                  <span class="step-title">Structure & exclusions</span>
+                  <span class="step-desc">Sections and crawl limits.</span>
+                </span>
+                <span class="step-status locked" data-survey-target="step3Status">Locked</span>
+              </button>
+              <div class="step-panel" data-survey-target="step3Panel">
+                <label class="field">
+                  <div class="field-label">
+                    <span>Primary sections for llms.txt</span>
+                    <span class="tooltip" data-tip="These are the buckets AI will use when reading your site. Think of them as the main chapters.">?</span>
+                  </div>
+                  <input
+                    type="text"
+                    name="categories"
+                    placeholder="Product, Pricing, Docs, Support"
+                    data-survey-target="categories"
+                    data-action="input->survey#persistSurvey input->survey#checkStepCompletion"
+                  >
+                  <span class="error hidden" data-survey-target="categoriesError"></span>
+                  <span class="hint">Use short labels, separated by commas.</span>
+                </label>
+                <label class="field">
+                  <div class="field-label">
+                    <span>Exclude URLs or paths</span>
+                    <span class="tooltip" data-tip="Tell us what to skip (login pages, carts, admin tools) so the crawl stays focused.">?</span>
+                  </div>
+                  <input
+                    type="text"
+                    name="excludes"
+                    placeholder="/login, /admin"
+                    data-survey-target="excludes"
+                    data-action="input->survey#persistSurvey input->survey#checkStepCompletion"
+                  >
+                  <span class="error hidden" data-survey-target="excludesError"></span>
+                  <span class="hint">Leave blank if you do not want to exclude anything.</span>
+                </label>
+                <div class="field">
+                  <div class="field-label">
+                    <span>Site type</span>
+                    <span class="tooltip" data-tip="We use this to choose the right example structure and wording when your crawl is limited.">?</span>
+                  </div>
+                  <div class="mt-2 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    <% [
+                      ["docs", "Documentation"],
+                      ["marketing", "Marketing"],
+                      ["saas", "SaaS"],
+                      ["ecommerce", "E-commerce"],
+                      ["marketplace", "Marketplace"],
+                      ["services", "Services"],
+                      ["education", "Education"],
+                      ["media", "Blog/Media"]
+                    ].each do |value, label| %>
+                      <button
+                        class="toggle <%= value == 'docs' ? 'active' : '' %>"
+                        type="button"
+                        data-action="survey#selectSiteType"
+                        data-site-type="<%= value %>"
+                      >
+                        <%= label %>
+                      </button>
+                    <% end %>
+                  </div>
+                  <input type="hidden" name="site_type" value="docs" data-survey-target="siteType">
+                  <span class="hint">Helps us pick the best fallback examples.</span>
+                </div>
+                <div class="step-actions">
+                  <button class="btn ghost" type="button" data-action="survey#prevStep">Back</button>
+                  <span class="step-note">Step 3 of 3</span>
+                </div>
+              </div>
+            </li>
+          </ol>
+
+          <div class="survey-footer">
+            <button
+              class="btn primary w-full sm:w-auto"
+              type="submit"
+              data-survey-target="submitBtn"
+              disabled
+            >
+              Generate llms.txt file
+            </button>
+            <p class="text-xs text-muted" data-survey-target="formNote">
+              Complete each step to unlock generation.
+            </p>
+            <p class="text-xs text-muted hidden" data-survey-target="statusMessage"></p>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Preview Section -->
+      <div id="preview-section" class="reveal preview" style="--delay: 180ms">
+        <div class="flex items-center justify-between">
+          <p class="eyebrow">llms.txt preview</p>
+        </div>
+
+        <div data-survey-target="previewIdle">
+          <p class="mt-4 text-muted">Fill the survey to generate your preview.</p>
+          <div class="resume-card mt-4 hidden" data-survey-target="storedRunCard">
+            <p class="text-sm font-semibold">Resume your last run</p>
+            <p class="text-xs text-muted" data-survey-target="storedRunInfo"></p>
+            <div class="mt-3 flex flex-wrap gap-2">
+              <button class="btn ghost" type="button" data-action="survey#restoreStoredRun">Restore</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="hidden" data-survey-target="previewGenerating">
+          <p class="mt-4 text-muted">Generating your llms.txt...</p>
+        </div>
+
+        <div class="hidden" data-survey-target="previewError">
+          <p class="mt-4 text-muted" data-survey-target="previewErrorMessage">
+            We could not generate yet. Please try again shortly.
+          </p>
+        </div>
+
+        <div class="hidden" data-survey-target="previewReady">
+          <div class="preview-shell mt-4">
+            <pre class="preview-text"><code data-survey-target="previewVisible"></code><code class="preview-locked" aria-hidden="true" data-survey-target="previewLocked"></code></pre>
+            <div class="preview-fade hidden" data-survey-target="previewFade"></div>
+            <div class="preview-cta hidden" data-survey-target="previewCta">
+              <div class="overlay-card">
+                <p class="overlay-title">Unlock the full llms.txt</p>
+                <p class="overlay-copy">
+                  One-time $<%= @price_usd %>. Pay via Stripe Checkout to download.
+                </p>
+                <button
+                  class="btn primary"
+                  type="button"
+                  data-action="survey#handleCheckout"
+                  data-survey-target="checkoutBtn"
+                >
+                  Pay to unlock
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6 grid gap-3">
+            <button class="btn primary hidden" type="button" data-action="survey#downloadPreview" data-survey-target="downloadBtn">
+              Download llms.txt
+            </button>
+            <p class="text-sm text-muted" data-survey-target="paymentNote">
+              Unlock the full file with a one-time $<%= @price_usd %> payment via Stripe Checkout.
+            </p>
+            <button class="btn ghost hidden" type="button" data-action="survey#startNewRun" data-survey-target="newRunBtn">
+              Start a new run
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Publish Steps -->
+    <section class="grid gap-8 lg:grid-cols-[1.1fr,0.9fr]">
+      <div class="reveal" style="--delay: 120ms">
+        <p class="eyebrow">Publish steps</p>
+        <h2 class="display text-3xl">Make it live in three steps.</h2>
+        <ol class="mt-6 grid gap-3 text-muted">
+          <% ["Save the file as llms.txt", "Upload to your public root (for example: /public or public_html)", "Confirm https://yourdomain.com/llms.txt loads as text"].each_with_index do |step, index| %>
+            <li class="flex gap-3">
+              <span class="step small"><%= index + 1 %></span>
+              <span><%= step %></span>
+            </li>
+          <% end %>
+        </ol>
+      </div>
+      <div class="reveal card" style="--delay: 180ms">
+        <p class="eyebrow">Ready to publish</p>
+        <h2 class="display text-2xl">Your llms.txt ships with clear steps.</h2>
+        <p class="mt-4 text-muted">
+          After payment, download the file and follow the checklist to publish at /llms.txt.
+        </p>
+        <button class="btn ghost mt-6" type="button" data-action="survey#scrollToSurvey">
+          Generate now
+        </button>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer reveal" style="--delay: 200ms">
+      <div class="footer-brand">site2llm</div>
+      <div class="footer-note">Made by Wellington Johnson.</div>
+    </footer>
+  </div>
+
+  <!-- Run ID Lookup Modal -->
+  <div
+    class="modal-backdrop hidden"
+    role="presentation"
+    data-action="click->survey#closeRunIdLookup keydown->survey#handleLookupKeydown"
+    data-survey-target="runIdModal"
+  >
+    <div
+      class="modal-panel card"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="run-id-title"
+      tabindex="-1"
+      data-action="click->survey#stopModalClick"
+    >
+      <div class="modal-header">
+        <h2 id="run-id-title" class="display text-2xl">Re-download your llms.txt</h2>
+        <button class="modal-close" type="button" data-action="survey#closeRunIdLookup" aria-label="Close">
+          &times;
+        </button>
+      </div>
+      <p class="modal-copy">
+        Enter the Run ID from your receipt or success page. We keep paid runs for 30 days.
+      </p>
+      <%= form_with url: "#", method: :get, data: { action: "submit->survey#submitRunIdLookup" }, class: "modal-form grid gap-4" do %>
+        <label class="field">
+          <div class="field-label"><span>Run ID</span></div>
+          <input
+            type="text"
+            placeholder="run_1234..."
+            autocomplete="off"
+            data-survey-target="runIdInput"
+            data-action="input->survey#clearRunIdError"
+          >
+          <span class="error hidden" data-survey-target="runIdError"></span>
+        </label>
+        <div class="modal-actions">
+          <button class="btn ghost" type="button" data-action="survey#closeRunIdLookup">Cancel</button>
+          <button class="btn primary" type="submit">Open download</button>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</main>

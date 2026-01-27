@@ -1,0 +1,170 @@
+<% content_for(:title, "Download your llms.txt - site2llm") %>
+
+<main class="min-h-fit bg-paper text-ink" data-controller="success" data-success-run-id-value="<%= @run_id %>" data-success-paid-value="<%= @paid %>" data-success-content-value="<%= @content.to_s.gsub('"', '&quot;') %>">
+  <div class="mx-auto flex max-w-3xl flex-col gap-4 px-6 py-4">
+    <header class="text-center">
+      <div class="mx-auto mb-4 inline-block rounded-full bg-white/70 px-3 py-1 text-xs uppercase tracking-[0.32em] text-muted shadow-sm">
+        <a href="/" class="text-sm text-accent-dark hover:underline">
+          &larr; Back to generation page
+        </a>
+      </div>
+
+      <% if @paid %>
+        <h1 class="text-lg">
+          Thank you for your purchase! Download your file below.
+        </h1>
+      <% else %>
+        <div data-success-target="pendingHeader">
+          <div class="mb-4 text-5xl animate-pulse" data-success-target="pendingIcon">&#x23F3;</div>
+          <h1 class="display text-3xl text-ink sm:text-4xl">
+            Confirming payment...
+          </h1>
+          <p class="mt-3 text-muted">
+            Please wait while we verify your payment with Stripe.
+          </p>
+        </div>
+        <div class="hidden" data-success-target="failedHeader">
+          <div class="mb-4 text-5xl">&#x23F3;</div>
+          <h1 class="display text-3xl text-ink sm:text-4xl">
+            Payment pending
+          </h1>
+          <p class="mt-3 text-muted">
+            We're still confirming your payment. This usually takes a few seconds.
+          </p>
+        </div>
+      <% end %>
+    </header>
+
+    <div class="card">
+      <% if @paid && @content %>
+        <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <span class="pill">Ready to download</span>
+          <span class="run-id text-sm text-muted">
+            <span>Run ID: <%= @run_id %></span>
+            <button
+              class="tooltip-link"
+              type="button"
+              data-tip="Save this Run ID. You can revisit this page for 30 days to re-download."
+              aria-label="What's this?"
+            >
+              What's this?
+            </button>
+          </span>
+        </div>
+
+        <div class="preview-shell mb-6">
+          <pre class="preview-text"><code><%= @content %></code></pre>
+        </div>
+
+        <div class="flex flex-wrap gap-3">
+          <button class="btn primary" type="button" data-action="success#downloadFile">
+            Download llms.txt
+          </button>
+          <button
+            class="btn ghost"
+            type="button"
+            data-action="success#copyToClipboard"
+            data-success-target="copyBtn"
+          >
+            Copy to clipboard
+          </button>
+        </div>
+        <p class="mt-2 text-sm text-muted" aria-live="polite" data-success-target="copyStatus">
+          Tap copy to keep the file in your clipboard.
+        </p>
+
+        <div class="mt-6 rounded-xl bg-accent-soft p-4">
+          <p class="text-sm font-semibold text-accent-dark">Next steps:</p>
+          <ol class="mt-2 list-inside list-decimal text-sm text-accent-dark">
+            <li>Save the file as <code class="rounded bg-white/50 px-1">llms.txt</code></li>
+            <li>Upload to your website's root directory</li>
+            <li>
+              Verify it's accessible at
+              <code class="rounded bg-white/50 px-1" data-success-target="llmsUrl">https://yourdomain.com/llms.txt</code>
+            </li>
+          </ol>
+          <p class="mt-3 text-sm text-accent-dark">
+            Need a hand with adding this file to your site? Email me and I'll try to help.
+            <a class="underline" href="mailto:wjohnson@eleudev.com">wjohnson@eleudev.com</a>
+          </p>
+        </div>
+      <% else %>
+        <div class="flex flex-col items-center gap-4 py-4 text-center" data-success-target="pollingArea">
+          <p class="text-muted" data-success-target="statusMessage">Confirming payment...</p>
+
+          <div class="h-2 w-48 overflow-hidden rounded-full bg-gray-200" data-success-target="progressBar">
+            <div
+              class="h-full bg-accent transition-all duration-300"
+              style="width: 0%"
+              data-success-target="progressFill"
+            ></div>
+          </div>
+
+          <div class="hidden" data-success-target="retryArea">
+            <button class="btn primary" type="button" data-action="success#refreshStatus">
+              Check again
+            </button>
+            <p class="mt-2 text-xs text-muted">
+              If the problem persists, email wjohnson@eleudev.com with Run ID: <%= @run_id %>
+            </p>
+          </div>
+        </div>
+
+        <!-- Content area shown after payment confirmed -->
+        <div class="hidden" data-success-target="paidContent">
+          <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <span class="pill">Ready to download</span>
+            <span class="run-id text-sm text-muted">
+              <span>Run ID: <%= @run_id %></span>
+              <button
+                class="tooltip-link"
+                type="button"
+                data-tip="Save this Run ID. You can revisit this page for 30 days to re-download."
+                aria-label="What's this?"
+              >
+                What's this?
+              </button>
+            </span>
+          </div>
+
+          <div class="preview-shell mb-6">
+            <pre class="preview-text"><code data-success-target="contentDisplay"></code></pre>
+          </div>
+
+          <div class="flex flex-wrap gap-3">
+            <button class="btn primary" type="button" data-action="success#downloadFile">
+              Download llms.txt
+            </button>
+            <button
+              class="btn ghost"
+              type="button"
+              data-action="success#copyToClipboard"
+              data-success-target="copyBtn2"
+            >
+              Copy to clipboard
+            </button>
+          </div>
+          <p class="mt-2 text-sm text-muted" aria-live="polite" data-success-target="copyStatus2">
+            Tap copy to keep the file in your clipboard.
+          </p>
+
+          <div class="mt-6 rounded-xl bg-accent-soft p-4">
+            <p class="text-sm font-semibold text-accent-dark">Next steps:</p>
+            <ol class="mt-2 list-inside list-decimal text-sm text-accent-dark">
+              <li>Save the file as <code class="rounded bg-white/50 px-1">llms.txt</code></li>
+              <li>Upload to your website's root directory</li>
+              <li>
+                Verify it's accessible at
+                <code class="rounded bg-white/50 px-1" data-success-target="llmsUrl2">https://yourdomain.com/llms.txt</code>
+              </li>
+            </ol>
+            <p class="mt-3 text-sm text-accent-dark">
+              Need a hand with adding this file to your site? Email me and I'll try to help.
+              <a class="underline" href="mailto:wjohnson@eleudev.com">wjohnson@eleudev.com</a>
+            </p>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</main>
