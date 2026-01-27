@@ -29,7 +29,7 @@ class FirecrawlService
         url: @input.site_url,
         limit: MAX_PAGES,
         scrapeOptions: {
-          formats: ["markdown"],
+          formats: [ "markdown" ],
           onlyMainContent: true
         }
       }

@@ -27,7 +27,7 @@ module Api
       end
 
       valid_token = token_from_header || token_param
-      return unauthorized unless valid_token.present? && valid_token == ENV["CLEANUP_TOKEN"]
+      unauthorized unless valid_token.present? && valid_token == ENV["CLEANUP_TOKEN"]
     end
 
     def unauthorized

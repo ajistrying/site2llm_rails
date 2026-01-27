@@ -51,7 +51,7 @@ class LlmEnrichService
     @pages
       .each_with_index
       .map { |page, index| { page: page, index: index, score: score_page(page, keywords, priority_set, optional_set) } }
-      .sort_by { |entry| [-entry[:score], entry[:index]] }
+      .sort_by { |entry| [ -entry[:score], entry[:index] ] }
       .first(MAX_PAGES)
       .map { |entry| entry[:page] }
   end
@@ -111,7 +111,7 @@ class LlmEnrichService
 
     begin
       depth = URI.parse(page.url).path.split("/").reject(&:blank?).length
-      score += [0, 6 - depth].max
+      score += [ 0, 6 - depth ].max
     rescue URI::InvalidURIError
       # Ignore
     end

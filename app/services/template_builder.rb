@@ -42,7 +42,7 @@ class TemplateBuilder
     ]
   }.freeze
 
-  FALLBACK_SECTIONS = ["Core documentation", "API reference", "Guides"].freeze
+  FALLBACK_SECTIONS = [ "Core documentation", "API reference", "Guides" ].freeze
 
   def initialize(input, pages, questions)
     @input = input
@@ -81,7 +81,7 @@ class TemplateBuilder
       )
     end
 
-    lines = ["# #{title}", "", "> #{line}", ""]
+    lines = [ "# #{title}", "", "> #{line}", "" ]
 
     if question_list.any?
       lines << "Key questions this site should answer:"
@@ -190,7 +190,7 @@ class TemplateBuilder
   end
 
   def join_url(base, *parts)
-    cleaned = [base.gsub(/\/+\z/, "")] + parts.map { |p| p.gsub(/\A\/+|\/+\z/, "") }
+    cleaned = [ base.gsub(/\/+\z/, "") ] + parts.map { |p| p.gsub(/\A\/+|\/+\z/, "") }
     cleaned.reject(&:blank?).join("/")
   end
 
@@ -209,6 +209,6 @@ class TemplateBuilder
 
   def select_examples(index)
     options = SITE_TYPE_EXAMPLES[@input.site_type] || SITE_TYPE_EXAMPLES["marketing"]
-    [options[index % options.length], options[(index + 1) % options.length]]
+    [ options[index % options.length], options[(index + 1) % options.length] ]
   end
 end

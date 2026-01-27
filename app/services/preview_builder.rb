@@ -10,7 +10,7 @@ class PreviewBuilder
     total = lines.length
     visible_count = (total / 2.0).ceil
 
-    visible_count = [1, total - MIN_LOCKED].max if total - visible_count < MIN_LOCKED
+    visible_count = [ 1, total - MIN_LOCKED ].max if total - visible_count < MIN_LOCKED
 
     visible = lines.first(visible_count).join("\n")
     locked_lines = lines.drop(visible_count)
