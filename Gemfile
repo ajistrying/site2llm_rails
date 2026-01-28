@@ -25,6 +25,9 @@ gem "connection_pool", "~> 2.4"
 # Background job processing with Sidekiq
 gem "sidekiq", "~> 7.0"
 
+# Interactor pattern for business logic
+gem "interactor", "~> 3.2"
+
 # HTTP client for API calls (Firecrawl, OpenAI)
 gem "faraday"
 

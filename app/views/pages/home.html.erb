@@ -55,9 +55,9 @@
       </div>
       <div class="grid gap-4">
         <% [
-          { title: "Tell us what AI should get right", description: "Share your homepage, key pages, and questions so we prioritize the answers." },
-          { title: "We crawl only the pages you pick", description: "Send 3-8 priority URLs plus optional pages as full links or /paths, separated by commas or new lines." },
-          { title: "Preview first, pay once, then publish", description: "Review the preview, unlock the file with one payment, and upload in minutes." }
+          { title: "Tell us about your site", description: "Share your URL, a brief description, and 3-8 important pages you want AI to understand." },
+          { title: "We crawl and generate intelligently", description: "Our AI crawls your pages, writes clear descriptions, and creates questions your site can answer." },
+          { title: "Preview, pay once, and publish", description: "Review the preview, unlock with one payment, and upload llms.txt to your site root." }
         ].each_with_index do |step, index| %>
           <div class="reveal flex gap-4" style="--delay: <%= 160 + index * 120 %>ms">
             <div class="step"><%= index + 1 %></div>
@@ -74,14 +74,14 @@
     <section id="survey" class="grid gap-10 lg:grid-cols-[1fr,1fr]">
       <div class="reveal card" style="--delay: 140ms">
         <div class="flex items-center justify-between">
-          <h2 class="display text-3xl">Crucial questions</h2>
-          <span class="pill">3-5 min questionnaire</span>
+          <h2 class="display text-3xl">Quick setup</h2>
+          <span class="pill">2 min</span>
         </div>
-        <p class="mt-4 text-muted">We only ask for what a crawler cannot infer.</p>
+        <p class="mt-4 text-muted">Just the basics. Our AI handles the rest.</p>
 
         <%= form_with url: "#", method: :post, data: { action: "submit->survey#handleGenerate", survey_target: "form" }, class: "mt-6 grid gap-6" do %>
           <ol class="survey-steps">
-            <!-- Step 1 -->
+            <!-- Step 1: Basic Info -->
             <li class="survey-step active" data-survey-target="step" data-step="1">
               <button
                 class="step-header"
@@ -92,26 +92,25 @@
               >
                 <span class="step-index">1</span>
                 <span class="step-meta">
-                  <span class="step-title">Project basics</span>
-                  <span class="step-desc">Name, URL, and summary.</span>
+                  <span class="step-title">Your site</span>
+                  <span class="step-desc">Name, URL, and what you do.</span>
                 </span>
                 <span class="step-status pending" data-survey-target="step1Status">In progress</span>
               </button>
               <div class="step-panel open" data-survey-target="step1Panel">
                 <label class="field">
-                  <div class="field-label"><span>Project or website name</span></div>
+                  <div class="field-label"><span>Business or project name</span></div>
                   <input
                     type="text"
                     name="site_name"
-                    placeholder="Northwind Atlas"
+                    placeholder="Acme Corp"
                     data-survey-target="siteName"
                     data-action="input->survey#persistSurvey input->survey#checkStepCompletion"
                   >
                   <span class="error hidden" data-survey-target="siteNameError"></span>
-                  <span class="hint">Use the official brand or product name.</span>
                 </label>
                 <label class="field">
-                  <div class="field-label"><span>Homepage URL</span></div>
+                  <div class="field-label"><span>Website URL</span></div>
                   <input
                     type="url"
                     name="site_url"
@@ -120,22 +119,21 @@
                     data-action="input->survey#persistSurvey input->survey#checkStepCompletion blur->survey#normalizeSiteUrl"
                   >
                   <span class="error hidden" data-survey-target="siteUrlError"></span>
-                  <span class="hint">We start crawling here (https:// assumed).</span>
                 </label>
                 <label class="field">
-                  <div class="field-label"><span>One sentence description</span></div>
+                  <div class="field-label"><span>What does your business do?</span></div>
                   <textarea
                     name="summary"
-                    rows="3"
-                    placeholder="Plain language summary of who this helps and what it does."
+                    rows="2"
+                    placeholder="We sell organic cotton socks and fair trade apparel to eco-conscious shoppers."
                     data-survey-target="summary"
                     data-action="input->survey#persistSurvey input->survey#checkStepCompletion"
                   ></textarea>
                   <span class="error hidden" data-survey-target="summaryError"></span>
-                  <span class="hint">One factual sentence (20+ characters).</span>
+                  <span class="hint">Be specific about who you help and what you offer.</span>
                 </label>
                 <div class="step-actions">
-                  <span class="step-note">Step 1 of 3</span>
+                  <span class="step-note">Step 1 of 2</span>
                   <button
                     class="btn ghost"
                     type="button"
@@ -149,7 +147,7 @@
               </div>
             </li>
 
-            <!-- Step 2 -->
+            <!-- Step 2: Important Pages -->
             <li class="survey-step" data-survey-target="step" data-step="2">
               <button
                 class="step-header"
@@ -163,155 +161,34 @@
               >
                 <span class="step-index">2</span>
                 <span class="step-meta">
-                  <span class="step-title">Priority crawl</span>
-                  <span class="step-desc">Pages and questions to rank.</span>
+                  <span class="step-title">Important pages</span>
+                  <span class="step-desc">Pages AI should prioritize.</span>
                 </span>
                 <span class="step-status locked" data-survey-target="step2Status">Locked</span>
               </button>
               <div class="step-panel" data-survey-target="step2Panel">
                 <label class="field">
                   <div class="field-label">
-                    <span>Priority pages (3-8 URLs)</span>
-                    <span class="tooltip" data-tip="We crawl these first and keep them at the top.">?</span>
+                    <span>Most important pages (3-8 URLs)</span>
+                    <span class="tooltip" data-tip="These are the pages you most want AI to understand and reference when answering questions about your business.">?</span>
                   </div>
                   <textarea
-                    name="priority_pages"
-                    rows="2"
-                    placeholder="https://example.com/pricing, /docs/getting-started"
-                    data-survey-target="priorityPages"
+                    name="important_pages"
+                    rows="4"
+                    placeholder="/pricing
+/products
+/about
+/faq
+/shipping-returns"
+                    data-survey-target="importantPages"
                     data-action="input->survey#persistSurvey input->survey#checkStepCompletion"
                   ></textarea>
-                  <span class="error hidden" data-survey-target="priorityPagesError"></span>
-                  <span class="hint">Use commas or new lines.</span>
-                </label>
-                <label class="field">
-                  <div class="field-label">
-                    <span>Optional pages (nice-to-have)</span>
-                    <span class="tooltip" data-tip="Placed under Optional so they can be skipped if context is tight.">?</span>
-                  </div>
-                  <textarea
-                    name="optional_pages"
-                    rows="2"
-                    placeholder="/blog, /case-studies"
-                    data-survey-target="optionalPages"
-                    data-action="input->survey#persistSurvey input->survey#checkStepCompletion"
-                  ></textarea>
-                  <span class="error hidden" data-survey-target="optionalPagesError"></span>
-                  <span class="hint">Nice-to-have context. Leave blank if none.</span>
-                </label>
-                <label class="field">
-                  <div class="field-label">
-                    <span>Main questions people ask about your site</span>
-                    <span class="tooltip" data-tip="Helps us prioritize pages and craft clearer summaries.">?</span>
-                  </div>
-                  <textarea
-                    name="questions"
-                    rows="2"
-                    placeholder="pricing, integrations, setup time"
-                    data-survey-target="questions"
-                    data-action="input->survey#persistSurvey input->survey#checkStepCompletion"
-                  ></textarea>
-                  <span class="error hidden" data-survey-target="questionsError"></span>
-                  <span class="hint">Short phrases are perfect.</span>
+                  <span class="error hidden" data-survey-target="importantPagesError"></span>
+                  <span class="hint">Use paths like /pricing or full URLs. One per line or comma-separated.</span>
                 </label>
                 <div class="step-actions">
                   <button class="btn ghost" type="button" data-action="survey#prevStep">Back</button>
-                  <span class="step-note">Step 2 of 3</span>
-                  <button
-                    class="btn ghost"
-                    type="button"
-                    data-action="survey#nextStep"
-                    data-survey-target="step2Next"
-                    disabled
-                  >
-                    Next
-                  </button>
-                </div>
-              </div>
-            </li>
-
-            <!-- Step 3 -->
-            <li class="survey-step" data-survey-target="step" data-step="3">
-              <button
-                class="step-header"
-                type="button"
-                aria-expanded="false"
-                aria-disabled="true"
-                disabled
-                data-action="survey#goToStep"
-                data-step-index="3"
-                data-survey-target="step3Header"
-              >
-                <span class="step-index">3</span>
-                <span class="step-meta">
-                  <span class="step-title">Structure & exclusions</span>
-                  <span class="step-desc">Sections and crawl limits.</span>
-                </span>
-                <span class="step-status locked" data-survey-target="step3Status">Locked</span>
-              </button>
-              <div class="step-panel" data-survey-target="step3Panel">
-                <label class="field">
-                  <div class="field-label">
-                    <span>Primary sections for llms.txt</span>
-                    <span class="tooltip" data-tip="These are the buckets AI will use when reading your site. Think of them as the main chapters.">?</span>
-                  </div>
-                  <input
-                    type="text"
-                    name="categories"
-                    placeholder="Product, Pricing, Docs, Support"
-                    data-survey-target="categories"
-                    data-action="input->survey#persistSurvey input->survey#checkStepCompletion"
-                  >
-                  <span class="error hidden" data-survey-target="categoriesError"></span>
-                  <span class="hint">Use short labels, separated by commas.</span>
-                </label>
-                <label class="field">
-                  <div class="field-label">
-                    <span>Exclude URLs or paths</span>
-                    <span class="tooltip" data-tip="Tell us what to skip (login pages, carts, admin tools) so the crawl stays focused.">?</span>
-                  </div>
-                  <input
-                    type="text"
-                    name="excludes"
-                    placeholder="/login, /admin"
-                    data-survey-target="excludes"
-                    data-action="input->survey#persistSurvey input->survey#checkStepCompletion"
-                  >
-                  <span class="error hidden" data-survey-target="excludesError"></span>
-                  <span class="hint">Leave blank if you do not want to exclude anything.</span>
-                </label>
-                <div class="field">
-                  <div class="field-label">
-                    <span>Site type</span>
-                    <span class="tooltip" data-tip="We use this to choose the right example structure and wording when your crawl is limited.">?</span>
-                  </div>
-                  <div class="mt-2 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    <% [
-                      ["docs", "Documentation"],
-                      ["marketing", "Marketing"],
-                      ["saas", "SaaS"],
-                      ["ecommerce", "E-commerce"],
-                      ["marketplace", "Marketplace"],
-                      ["services", "Services"],
-                      ["education", "Education"],
-                      ["media", "Blog/Media"]
-                    ].each do |value, label| %>
-                      <button
-                        class="toggle <%= value == 'docs' ? 'active' : '' %>"
-                        type="button"
-                        data-action="survey#selectSiteType"
-                        data-site-type="<%= value %>"
-                      >
-                        <%= label %>
-                      </button>
-                    <% end %>
-                  </div>
-                  <input type="hidden" name="site_type" value="docs" data-survey-target="siteType">
-                  <span class="hint">Helps us pick the best fallback examples.</span>
-                </div>
-                <div class="step-actions">
-                  <button class="btn ghost" type="button" data-action="survey#prevStep">Back</button>
-                  <span class="step-note">Step 3 of 3</span>
+                  <span class="step-note">Step 2 of 2</span>
                 </div>
               </div>
             </li>
@@ -324,10 +201,10 @@
               data-survey-target="submitBtn"
               disabled
             >
-              Generate llms.txt file
+              Generate llms.txt
             </button>
             <p class="text-xs text-muted" data-survey-target="formNote">
-              Complete each step to unlock generation.
+              Complete both steps to generate.
             </p>
             <p class="text-xs text-muted hidden" data-survey-target="statusMessage"></p>
           </div>
