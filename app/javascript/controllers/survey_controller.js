@@ -1,18 +1,16 @@
 import { Controller } from "@hotwired/stimulus"
 
-const SURVEY_STORAGE_KEY = "site2llm-survey"
+const SURVEY_STORAGE_KEY = "site2llm-survey-v2"
 const RUN_STORAGE_KEY = "site2llm-run"
 
 export default class extends Controller {
   static targets = [
     "form", "step", "submitBtn", "formNote", "statusMessage",
-    "siteName", "siteUrl", "summary", "priorityPages", "optionalPages",
-    "questions", "categories", "excludes", "siteType",
-    "siteNameError", "siteUrlError", "summaryError", "priorityPagesError",
-    "optionalPagesError", "questionsError", "categoriesError", "excludesError",
-    "step1Status", "step2Status", "step3Status",
-    "step1Panel", "step2Panel", "step3Panel",
-    "step1Next", "step2Next", "step2Header", "step3Header",
+    "siteName", "siteUrl", "summary", "importantPages",
+    "siteNameError", "siteUrlError", "summaryError", "importantPagesError",
+    "step1Status", "step2Status",
+    "step1Panel", "step2Panel",
+    "step1Next", "step2Header",
     "previewIdle", "previewGenerating", "previewError", "previewReady",
     "previewErrorMessage", "previewVisible", "previewLocked",
     "previewFade", "previewCta", "checkoutBtn", "downloadBtn",
@@ -41,17 +39,7 @@ export default class extends Controller {
       if (saved.site_name && this.hasSiteNameTarget) this.siteNameTarget.value = saved.site_name
       if (saved.site_url && this.hasSiteUrlTarget) this.siteUrlTarget.value = saved.site_url
       if (saved.summary && this.hasSummaryTarget) this.summaryTarget.value = saved.summary
-      if (saved.priority_pages && this.hasPriorityPagesTarget) this.priorityPagesTarget.value = saved.priority_pages
-      if (saved.optional_pages && this.hasOptionalPagesTarget) this.optionalPagesTarget.value = saved.optional_pages
-      if (saved.questions && this.hasQuestionsTarget) this.questionsTarget.value = saved.questions
-      if (saved.categories && this.hasCategoriesTarget) this.categoriesTarget.value = saved.categories
-      if (saved.excludes && this.hasExcludesTarget) this.excludesTarget.value = saved.excludes
-      if (saved.site_type && this.hasSiteTypeTarget) {
-        this.siteTypeTarget.value = saved.site_type
-        this.element.querySelectorAll('.toggle').forEach(btn => {
-          btn.classList.toggle('active', btn.dataset.siteType === saved.site_type)
-        })
-      }
+      if (saved.important_pages && this.hasImportantPagesTarget) this.importantPagesTarget.value = saved.important_pages
     } catch (e) {
       // Ignore errors
     }
@@ -108,18 +96,19 @@ export default class extends Controller {
   buildPayload() {
     return {
       site_name: this.hasSiteNameTarget ? this.siteNameTarget.value : "",
-      site_url: this.hasSiteUrlTarget ? this.normalizeSiteUrl(this.siteUrlTarget.value) : "",
+      site_url: this.hasSiteUrlTarget ? this._normalizeUrl(this.siteUrlTarget.value) : "",
       summary: this.hasSummaryTarget ? this.summaryTarget.value : "",
-      priority_pages: this.hasPriorityPagesTarget ? this.priorityPagesTarget.value : "",
-      optional_pages: this.hasOptionalPagesTarget ? this.optionalPagesTarget.value : "",
-      questions: this.hasQuestionsTarget ? this.questionsTarget.value : "",
-      categories: this.hasCategoriesTarget ? this.categoriesTarget.value : "",
-      excludes: this.hasExcludesTarget ? this.excludesTarget.value : "",
-      site_type: this.hasSiteTypeTarget ? this.siteTypeTarget.value : "docs"
+      important_pages: this.hasImportantPagesTarget ? this.importantPagesTarget.value : ""
     }
   }
 
-  normalizeSiteUrl(value) {
+  normalizeSiteUrl() {
+    if (!this.hasSiteUrlTarget) return
+    this.siteUrlTarget.value = this._normalizeUrl(this.siteUrlTarget.value)
+    this.checkStepCompletion()
+  }
+
+  _normalizeUrl(value) {
     const trimmed = value.trim()
     if (!trimmed) return ""
     if (/^https?:\/\//i.test(trimmed)) return trimmed
@@ -130,7 +119,6 @@ export default class extends Controller {
   checkStepCompletion() {
     const step1Complete = this.isStep1Complete()
     const step2Complete = this.isStep2Complete()
-    const step3Complete = this.isStep3Complete()
 
     // Update step 1 status
     if (this.hasStep1StatusTarget) {
@@ -159,30 +147,9 @@ export default class extends Controller {
         this.step2StatusTarget.classList.remove("locked")
       }
     }
-    if (this.hasStep2NextTarget) {
-      this.step2NextTarget.disabled = !step2Complete
-    }
 
-    // Update step 3 status and unlock
-    if (this.hasStep3HeaderTarget) {
-      this.step3HeaderTarget.disabled = !step2Complete
-      this.step3HeaderTarget.setAttribute("aria-disabled", !step2Complete)
-    }
-    if (this.hasStep3StatusTarget) {
-      if (!step2Complete) {
-        this.step3StatusTarget.textContent = "Locked"
-        this.step3StatusTarget.classList.add("locked")
-        this.step3StatusTarget.classList.remove("done", "pending")
-      } else {
-        this.step3StatusTarget.textContent = step3Complete ? "Complete" : "In progress"
-        this.step3StatusTarget.classList.toggle("done", step3Complete)
-        this.step3StatusTarget.classList.toggle("pending", !step3Complete)
-        this.step3StatusTarget.classList.remove("locked")
-      }
-    }
-
-    // Update submit button
-    const formComplete = step1Complete && step2Complete && step3Complete
+    // Update submit button - now only 2 steps
+    const formComplete = step1Complete && step2Complete
     if (this.hasSubmitBtnTarget) {
       this.submitBtnTarget.disabled = !formComplete || this.status === "generating"
     }
@@ -199,18 +166,12 @@ export default class extends Controller {
   }
 
   isStep2Complete() {
-    const priorityPages = this.splitList(this.hasPriorityPagesTarget ? this.priorityPagesTarget.value : "")
-    const questions = this.splitList(this.hasQuestionsTarget ? this.questionsTarget.value : "")
-    return priorityPages.length >= 3 && priorityPages.length <= 8 && questions.length > 0
-  }
-
-  isStep3Complete() {
-    const categories = this.splitList(this.hasCategoriesTarget ? this.categoriesTarget.value : "")
-    return categories.length > 0
+    const importantPages = this.splitList(this.hasImportantPagesTarget ? this.importantPagesTarget.value : "")
+    return importantPages.length >= 3 && importantPages.length <= 8
   }
 
   isValidUrl(value) {
-    const trimmed = this.normalizeSiteUrl(value)
+    const trimmed = this._normalizeUrl(value)
     if (!trimmed) return false
     try {
       const parsed = new URL(trimmed)
@@ -231,12 +192,11 @@ export default class extends Controller {
   goToStep(event) {
     const stepIndex = parseInt(event.currentTarget.dataset.stepIndex, 10)
     if (stepIndex === 2 && !this.isStep1Complete()) return
-    if (stepIndex === 3 && !this.isStep2Complete()) return
     this.setCurrentStep(stepIndex)
   }
 
   nextStep() {
-    if (this.currentStep < 3) {
+    if (this.currentStep < 2) {
       this.setCurrentStep(this.currentStep + 1)
     }
   }
@@ -261,20 +221,6 @@ export default class extends Controller {
     if (this.hasStep2PanelTarget) {
       this.step2PanelTarget.classList.toggle("open", step === 2)
     }
-    if (this.hasStep3PanelTarget) {
-      this.step3PanelTarget.classList.toggle("open", step === 3)
-    }
-  }
-
-  selectSiteType(event) {
-    const siteType = event.currentTarget.dataset.siteType
-    this.element.querySelectorAll('.toggle').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.siteType === siteType)
-    })
-    if (this.hasSiteTypeTarget) {
-      this.siteTypeTarget.value = siteType
-    }
-    this.persistSurvey()
   }
 
   scrollToSurvey() {
@@ -394,8 +340,16 @@ export default class extends Controller {
 
   showErrors(errors) {
     Object.entries(errors).forEach(([field, message]) => {
-      const errorTarget = this[`has${this.capitalize(field)}ErrorTarget`] ? this[`${this.camelize(field)}ErrorTarget`] : null
-      const inputTarget = this[`has${this.capitalize(field)}Target`] ? this[`${this.camelize(field)}Target`] : null
+      // Map server field names to target names
+      const fieldMap = {
+        'site_name': 'siteName',
+        'site_url': 'siteUrl',
+        'summary': 'summary',
+        'important_pages': 'importantPages'
+      }
+      const targetField = fieldMap[field] || this.camelize(field)
+      const errorTarget = this[`has${this.capitalize(targetField)}ErrorTarget`] ? this[`${targetField}ErrorTarget`] : null
+      const inputTarget = this[`has${this.capitalize(targetField)}Target`] ? this[`${targetField}Target`] : null
       if (errorTarget) {
         errorTarget.textContent = message
         errorTarget.classList.remove("hidden")
@@ -407,7 +361,7 @@ export default class extends Controller {
   }
 
   clearErrors() {
-    const errorFields = ["siteName", "siteUrl", "summary", "priorityPages", "optionalPages", "questions", "categories", "excludes"]
+    const errorFields = ["siteName", "siteUrl", "summary", "importantPages"]
     errorFields.forEach(field => {
       const errorTarget = this[`has${this.capitalize(field)}ErrorTarget`] ? this[`${field}ErrorTarget`] : null
       const inputTarget = this[`has${this.capitalize(field)}Target`] ? this[`${field}Target`] : null

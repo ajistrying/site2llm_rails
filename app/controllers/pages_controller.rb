@@ -1,7 +1,7 @@
 class PagesController < ApplicationController
   def home
-    @price_usd = LlmsGenerator::PRICE_USD
-    @site_types = LlmsGenerator::SITE_TYPES
+    @price_usd = ::Llms::Generate::PRICE_USD
+    @site_types = ::Llms::Generate::SITE_TYPES
   end
 
   def success
@@ -16,6 +16,6 @@ class PagesController < ApplicationController
 
     @paid = @run.paid?
     @content = @paid ? @run.content : nil
-    @price_usd = LlmsGenerator::PRICE_USD
+    @price_usd = ::Llms::Generate::PRICE_USD
   end
 end
