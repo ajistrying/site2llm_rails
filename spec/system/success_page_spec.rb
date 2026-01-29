@@ -18,7 +18,6 @@ RSpec.describe 'Success Page', type: :system do
       visit success_path(runId: 'invalid-id')
 
       expect(page).to have_current_path(root_path)
-      
     end
   end
 
@@ -29,7 +28,6 @@ RSpec.describe 'Success Page', type: :system do
       visit success_path(runId: expired_run.id)
 
       expect(page).to have_current_path(root_path)
-      
     end
   end
 
