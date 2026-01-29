@@ -96,13 +96,19 @@ export default class extends Controller {
   buildPayload() {
     return {
       site_name: this.hasSiteNameTarget ? this.siteNameTarget.value : "",
-      site_url: this.hasSiteUrlTarget ? this.normalizeSiteUrl(this.siteUrlTarget.value) : "",
+      site_url: this.hasSiteUrlTarget ? this._normalizeUrl(this.siteUrlTarget.value) : "",
       summary: this.hasSummaryTarget ? this.summaryTarget.value : "",
       important_pages: this.hasImportantPagesTarget ? this.importantPagesTarget.value : ""
     }
   }
 
-  normalizeSiteUrl(value) {
+  normalizeSiteUrl() {
+    if (!this.hasSiteUrlTarget) return
+    this.siteUrlTarget.value = this._normalizeUrl(this.siteUrlTarget.value)
+    this.checkStepCompletion()
+  }
+
+  _normalizeUrl(value) {
     const trimmed = value.trim()
     if (!trimmed) return ""
     if (/^https?:\/\//i.test(trimmed)) return trimmed
@@ -165,7 +171,7 @@ export default class extends Controller {
   }
 
   isValidUrl(value) {
-    const trimmed = this.normalizeSiteUrl(value)
+    const trimmed = this._normalizeUrl(value)
     if (!trimmed) return false
     try {
       const parsed = new URL(trimmed)

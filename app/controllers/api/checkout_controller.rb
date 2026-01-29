@@ -12,7 +12,7 @@ module Api
       return render json: { error: "Run is already paid." }, status: :conflict if run.paid?
 
       origin = "#{request.protocol}#{request.host_with_port}"
-      result = Stripe::CreateCheckout.call(run_id: run_id, origin: origin)
+      result = ::Stripe::CreateCheckout.call(run_id: run_id, origin: origin)
 
       if result.success?
         render json: { url: result.checkout_url }

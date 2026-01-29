@@ -64,6 +64,35 @@ group :development, :test do
 
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
+
+  # RSpec testing framework (needed in dev for generators)
+  gem "rspec-rails", "~> 7.0"
+
+  # Factory Bot for test data (needed in dev for console testing)
+  gem "factory_bot_rails"
+end
+
+group :test do
+  # Capybara for system tests
+  gem "capybara"
+
+  # Selenium for browser-based testing
+  gem "selenium-webdriver"
+
+  # Database Cleaner for test isolation
+  gem "database_cleaner-active_record"
+
+  # Faker for generating test data
+  gem "faker"
+
+  # WebMock for stubbing HTTP requests
+  gem "webmock"
+
+  # VCR for recording HTTP interactions
+  gem "vcr"
+
+  # Shoulda Matchers for RSpec
+  gem "shoulda-matchers"
 end
 
 group :development do
