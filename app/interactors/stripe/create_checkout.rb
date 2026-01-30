@@ -30,7 +30,8 @@ module Stripe
         "line_items[0][price]" => ENV["STRIPE_PRICE_ID"],
         "line_items[0][quantity]" => "1",
         "client_reference_id" => context.run_id,
-        "metadata[run_id]" => context.run_id
+        "metadata[run_id]" => context.run_id,
+        "allow_promotion_codes" => "true"
       })
 
       conn = Faraday.new do |f|
