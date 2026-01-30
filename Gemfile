@@ -34,6 +34,9 @@ gem "faraday"
 # Stripe for payment processing
 gem "stripe"
 
+# Meta tags for SEO and social sharing (OG, Twitter Cards)
+gem "meta-tags"
+
 # Environment variable management
 gem "dotenv-rails", groups: [ :development, :test ]
 

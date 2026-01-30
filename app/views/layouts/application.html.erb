@@ -1,7 +1,19 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%= content_for(:title) || "site2llm - llms.txt for AI search" %></title>
+    <% og_image_url = "#{request.base_url}/site2llm-og.png" %>
+    <%= display_meta_tags site: "site2llm",
+                          separator: "-",
+                          description: "Generate llms.txt so AI search reads your site correctly. Answer a few questions, get a clean llms.txt you can publish in minutes.",
+                          og: {
+                            site_name: "site2llm",
+                            type: "website",
+                            image: og_image_url
+                          },
+                          twitter: {
+                            card: "summary_large_image",
+                            image: og_image_url
+                          } %>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="application-name" content="site2llm">
