@@ -69,7 +69,7 @@ group :development, :test do
   gem "rubocop-rails-omakase", require: false
 
   # RSpec testing framework (needed in dev for generators)
-  gem "rspec-rails", "~> 7.0"
+  gem "rspec-rails", "~> 8.0"
 
   # Factory Bot for test data (needed in dev for console testing)
   gem "factory_bot_rails"
