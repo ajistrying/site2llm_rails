@@ -20,7 +20,7 @@ gem "cssbundling-rails"
 gem "redis", ">= 4.0.1"
 
 # Connection pool (pinned for Sidekiq compatibility with connection_pool 3.x)
-gem "connection_pool", "~> 2.4"
+gem "connection_pool", "~> 3.0"
 
 # Background job processing with Sidekiq
 gem "sidekiq", "~> 7.0"
